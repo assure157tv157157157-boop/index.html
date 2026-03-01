@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>spectra ai</title>
+<title>Minha IA Gemini</title>
 
 <style>
 body {
@@ -28,6 +28,8 @@ header {
     flex: 1;
     padding: 15px;
     overflow-y: auto;
+    display: flex;
+    flex-direction: column;
 }
 
 .message {
@@ -35,6 +37,7 @@ header {
     padding: 10px 15px;
     border-radius: 10px;
     max-width: 80%;
+    word-wrap: break-word;
 }
 
 .user {
@@ -77,7 +80,7 @@ button {
 
 <body>
 
-<header>🤖 Minha IA</header>
+<header>🤖 Minha IA Gemini</header>
 
 <div id="chat"></div>
 
@@ -87,7 +90,13 @@ button {
 </div>
 
 <script>
+
+const API_KEY = "AIzaSyBtimoOs3nYRyvjbLI7bP6GysW3P0D2vJU";
+
+const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+
 const chat = document.getElementById("chat");
+let conversationHistory = [];
 
 function addMessage(text, sender) {
     const msg = document.createElement("div");
@@ -107,32 +116,49 @@ async function sendMessage() {
 
     addMessage("Digitando...", "bot");
 
+    conversationHistory.push({
+        role: "user",
+        parts: [{ text: text }]
+    });
+
     try {
-        const response = await fetch("AIzaSyBtimoOs3nYRyvjbLI7bP6GysW3P0D2vJU", {
+        const response = await fetch(API_URL, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                message: text
+                contents: conversationHistory
             })
         });
 
         const data = await response.json();
 
-        // Remove "Digitando..."
         chat.removeChild(chat.lastChild);
 
-        // Ajuste aqui se sua API retornar diferente
-        const botReply = data.response || data.text || JSON.stringify(data);
+        let botReply = data.candidates?.[0]?.content?.parts?.[0]?.text 
+            || "Erro ao gerar resposta.";
 
         addMessage(botReply, "bot");
+
+        conversationHistory.push({
+            role: "model",
+            parts: [{ text: botReply }]
+        });
 
     } catch (error) {
         chat.removeChild(chat.lastChild);
         addMessage("Erro ao conectar com a IA.", "bot");
+        console.error(error);
     }
 }
+
+document.getElementById("input").addEventListener("keypress", function(e) {
+    if (e.key === "Enter") {
+        sendMessage();
+    }
+});
+
 </script>
 
 </body>
