@@ -1,6 +1,5 @@
 --[[
-    Script: Spectra Admin + Hitbox + Aimbot com seleção de parte
-    Autor: Spectra Estúdios
+    spectra universal 
 ]]
 
 local WindUI = loadstring(game:HttpGet(
@@ -364,11 +363,188 @@ for _, player in pairs(Players:GetPlayers()) do
     end
 end
 
+
+-- Aba Main
+local MainTab = Window:Tab({
+    Title = "Main",
+    Icon = "zap",
+})
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local LocalPlayer = Players.LocalPlayer
+
+-- Variáveis
+local SpeedValue = 16
+local JumpValue = 50
+local GravityValue = 196.2
+local SpinSpeed = 0
+local Spinning = false
+local Noclip = false
+
+-- Função pegar character
+local function GetCharacter()
+    return LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+end
+
+-- SPEED (estilo hacker)
+MainTab:Slider({
+    Title = "Speed Hacker",
+    Min = 16,
+    Max = 1000,
+    Default = 16,
+    Callback = function(Value)
+        SpeedValue = Value
+    end
+})
+
+-- Aplica speed estilo hack (movimentação forçada)
+RunService.RenderStepped:Connect(function()
+    local Char = GetCharacter()
+    local Humanoid = Char:FindFirstChildOfClass("Humanoid")
+    local HRP = Char:FindFirstChild("HumanoidRootPart")
+
+    if Humanoid and HRP then
+        Humanoid.WalkSpeed = 16 -- mantém normal
+
+        if SpeedValue > 16 then
+            local MoveDir = Humanoid.MoveDirection
+            HRP.Velocity = Vector3.new(
+                MoveDir.X * SpeedValue,
+                HRP.Velocity.Y,
+                MoveDir.Z * SpeedValue
+            )
+        end
+    end
+end)
+
+-- JUMP POWER
+MainTab:Slider({
+    Title = "Jump Power",
+    Min = 50,
+    Max = 1000,
+    Default = 50,
+    Callback = function(Value)
+        JumpValue = Value
+        local Humanoid = GetCharacter():FindFirstChildOfClass("Humanoid")
+        if Humanoid then
+            Humanoid.JumpPower = JumpValue
+        end
+    end
+})
+
+-- GRAVIDADE
+MainTab:Slider({
+    Title = "Gravity",
+    Min = 0,
+    Max = 1000,
+    Default = 196,
+    Callback = function(Value)
+        GravityValue = Value
+        workspace.Gravity = GravityValue
+    end
+})
+
+-- NOCLIP
+MainTab:Toggle({
+    Title = "Atravessar Paredes",
+    Default = false,
+    Callback = function(Value)
+        Noclip = Value
+    end
+})
+
+RunService.Stepped:Connect(function()
+    if Noclip then
+        for _, part in pairs(GetCharacter():GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = false
+            end
+        end
+    end
+end)
+
+-- DPI / Tela mais lisa
+MainTab:Slider({
+    Title = "DPI Boost",
+    Min = 0,
+    Max = 1000,
+    Default = 0,
+    Callback = function(Value)
+        -- simula "dpi" alterando FOV
+        workspace.CurrentCamera.FieldOfView = 70 + (Value / 20)
+    end
+})
+
+-- SPINBOT TOGGLE
+MainTab:Toggle({
+    Title = "Spinbot",
+    Default = false,
+    Callback = function(Value)
+        Spinning = Value
+    end
+})
+
+-- SPIN SPEED
+MainTab:Slider({
+    Title = "Spin Speed",
+    Min = 0,
+    Max = 5000,
+    Default = 0,
+    Callback = function(Value)
+        SpinSpeed = Value
+    end
+})
+
+-- Aplicar Spin
+RunService.RenderStepped:Connect(function()
+    if Spinning and SpinSpeed > 0 then
+        local HRP = GetCharacter():FindFirstChild("HumanoidRootPart")
+        if HRP then
+            HRP.CFrame = HRP.CFrame * CFrame.Angles(0, math.rad(SpinSpeed), 0)
+        end
+    end
+end)
+
+-- EXTRA 1: Super Zoom
+MainTab:Slider({
+    Title = "Super Zoom",
+    Min = 10,
+    Max = 120,
+    Default = 70,
+    Callback = function(Value)
+        workspace.CurrentCamera.FieldOfView = Value
+    end
+})
+
+-- EXTRA 2: Infinite Jump
+local InfiniteJump = false
+
+MainTab:Toggle({
+    Title = "Infinite Jump",
+    Default = false,
+    Callback = function(Value)
+        InfiniteJump = Value
+    end
+})
+
+UserInputService.JumpRequest:Connect(function()
+    if InfiniteJump then
+        local Humanoid = GetCharacter():FindFirstChildOfClass("Humanoid")
+        if Humanoid then
+            Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+        end
+    end
+end)
+
+
+
 -- ========== INTERFACE GRÁFICA (WindUI) ==========
 
 -- Aba Tiro (Aimbot)
 local TiroTab = Window:Tab({
-    Title = "Tiro",
+    Title = "jogo de Tiro",
     Icon = "crosshair",
 })
 
@@ -435,15 +611,6 @@ local SliderRecoil = TiroTab:Slider({
     end,
 })
 
-local ToggleWallhack = TiroTab:Toggle({
-    Title = "Wallhack (ESP)",
-    Desc = "Visar através de paredes",
-    Value = false,
-    Callback = function(Value)
-        AimbotConfig.WallhackEnabled = Value
-        Window:Notify({ Title = "Wallhack", Content = Value and "ATIVADO!" or "DESATIVADO!", Icon = Value and "eye-off" or "eye", Duration = 2 })
-    end,
-})
 
 TiroTab:Toggle({
     Title = "Show FOV Circle",
@@ -515,7 +682,7 @@ local SliderHitboxSize = HitboxTab:Slider({
     Title = "Hitbox Size",
     Desc = "Tamanho do hitbox (valor base)",
     Step = 1,
-    Value = { Min = 1, Max = 50, Default = 10 },
+    Value = { Min = 1, Max = 1500, Default = 10 },
     Callback = function(Value)
         HitboxConfig.Size = Value
         if HitboxConfig.Enabled then UpdateHitboxes() end
