@@ -506,7 +506,7 @@ local SliderHitboxSize = HitboxTab:Slider({
     Title = "Hitbox Size",
     Desc = "Tamanho do hitbox (valor base)",
     Step = 1,
-    Value = { Min = 1, Max = 1500, Default = 10 },
+    Value = { Min = 1, Max = 50, Default = 10 },
     Callback = function(Value)
         HitboxConfig.Size = Value
         if HitboxConfig.Enabled then UpdateHitboxes() end
