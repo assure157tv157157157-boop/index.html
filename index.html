@@ -1,164 +1,232 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Minha IA Gemini</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nova Obfuscator | Panel</title>
 
-<style>
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: #0f172a;
-    color: white;
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-}
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 
-header {
-    padding: 15px;
-    background: #1e293b;
-    text-align: center;
-    font-size: 20px;
-    font-weight: bold;
-}
+    <style>
+        :root {
+            --primary: #9d4edd;
+            --primary-hover: #7b2cbf;
+            --bg: #0a0a0a;
+            --card: rgba(20,20,20,0.8);
+            --border: rgba(255,255,255,0.1);
+            --text: #fff;
+            --text-dim: #aaa;
+        }
 
-#chat {
-    flex: 1;
-    padding: 15px;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-}
+        * {
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:'Inter',sans-serif;
+        }
 
-.message {
-    margin-bottom: 15px;
-    padding: 10px 15px;
-    border-radius: 10px;
-    max-width: 80%;
-    word-wrap: break-word;
-}
+        body {
+            background: radial-gradient(circle,#1a0b2e,#0a0a0a);
+            color:var(--text);
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+        }
 
-.user {
-    background: #2563eb;
-    align-self: flex-end;
-}
+        header {
+            text-align:center;
+            padding:2rem;
+        }
 
-.bot {
-    background: #334155;
-    align-self: flex-start;
-}
+        .logo {
+            font-size:2.5rem;
+            font-weight:800;
+            background:linear-gradient(to right,#fff,var(--primary));
+            -webkit-background-clip:text;
+            -webkit-text-fill-color:transparent;
+        }
 
-#input-area {
-    display: flex;
-    padding: 10px;
-    background: #1e293b;
-}
+        .container {
+            width:95%;
+            max-width:1000px;
+            display:grid;
+            grid-template-columns:1fr 300px;
+            gap:2rem;
+        }
 
-#input {
-    flex: 1;
-    padding: 10px;
-    border-radius: 8px;
-    border: none;
-    outline: none;
-    font-size: 16px;
-}
+        @media(max-width:850px){
+            .container{grid-template-columns:1fr;}
+        }
 
-button {
-    margin-left: 10px;
-    padding: 10px 15px;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    background: #2563eb;
-    color: white;
-    font-weight: bold;
-}
-</style>
+        .glass {
+            background:var(--card);
+            border:1px solid var(--border);
+            border-radius:20px;
+            padding:1.5rem;
+            backdrop-filter:blur(10px);
+        }
+
+        textarea {
+            width:100%;
+            height:400px;
+            background:#0006;
+            border:1px solid var(--border);
+            border-radius:10px;
+            color:#ccc;
+            padding:1rem;
+            resize:none;
+        }
+
+        button {
+            cursor:pointer;
+            border:none;
+            border-radius:10px;
+            padding:0.8rem;
+        }
+
+        .level-btn {
+            width:100%;
+            background:#fff1;
+            margin-bottom:5px;
+            color:#fff;
+        }
+
+        .level-btn.active {
+            background:var(--primary);
+        }
+
+        .obf-btn {
+            width:100%;
+            background:var(--primary);
+            color:#fff;
+            font-weight:700;
+            margin-top:10px;
+        }
+
+        .obf-btn:hover {
+            background:var(--primary-hover);
+        }
+
+        .toast {
+            position:fixed;
+            bottom:20px;
+            right:20px;
+            background:#2ecc71;
+            padding:10px 20px;
+            border-radius:10px;
+            display:none;
+        }
+    </style>
 </head>
 
 <body>
 
-<header>🤖 Minha IA Gemini</header>
+<header>
+    <h1 class="logo">Nova Obf</h1>
+    <p style="color:var(--text-dim)">Proteção de scripts Lua</p>
+</header>
 
-<div id="chat"></div>
+<div class="container">
 
-<div id="input-area">
-    <input type="text" id="input" placeholder="Digite sua mensagem..." />
-    <button onclick="sendMessage()">Enviar</button>
+    <div class="glass">
+        <h3>Source Code</h3>
+        <textarea id="codeInput" placeholder="-- Cole seu script aqui"></textarea>
+
+        <div style="display:flex;gap:10px;margin-top:10px;">
+            <button onclick="copyCode()" class="level-btn">Copy</button>
+            <button onclick="clearCode()" class="level-btn">Clear</button>
+        </div>
+    </div>
+
+    <div class="glass">
+        <h4>Level</h4>
+
+        <button class="level-btn active" onclick="setLevel('weak',this)">Weak</button>
+        <button class="level-btn" onclick="setLevel('medium',this)">Medium</button>
+        <button class="level-btn" onclick="setLevel('strong',this)">Strong</button>
+        <button class="level-btn" onclick="setLevel('harder',this)">Harder</button>
+        <button class="level-btn" onclick="setLevel('premium',this)">Premium</button>
+        <button class="level-btn" onclick="setLevel('ultra',this)">Ultra</button>
+
+        <button id="obfBtn" onclick="obfuscate()" class="obf-btn">
+            Ofuscar
+        </button>
+    </div>
+
 </div>
 
+<div id="toast" class="toast">Copiado!</div>
+
 <script>
+    let currentLevel = "weak";
 
-const API_KEY = "AIzaSyBtimoOs3nYRyvjbLI7bP6GysW3P0D2vJU";
+    const apiKey = "nova_f6fe7qtco9wzdj8cd2usxq"; // ✅ SUA API
+    const apiUrl = "https://nova-obf.netlify.app/.netlify/functions/obf";
 
-const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
-
-const chat = document.getElementById("chat");
-let conversationHistory = [];
-
-function addMessage(text, sender) {
-    const msg = document.createElement("div");
-    msg.classList.add("message", sender);
-    msg.innerText = text;
-    chat.appendChild(msg);
-    chat.scrollTop = chat.scrollHeight;
-}
-
-async function sendMessage() {
-    const input = document.getElementById("input");
-    const text = input.value.trim();
-    if (!text) return;
-
-    addMessage(text, "user");
-    input.value = "";
-
-    addMessage("Digitando...", "bot");
-
-    conversationHistory.push({
-        role: "user",
-        parts: [{ text: text }]
-    });
-
-    try {
-        const response = await fetch(API_URL, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                contents: conversationHistory
-            })
-        });
-
-        const data = await response.json();
-
-        chat.removeChild(chat.lastChild);
-
-        let botReply = data.candidates?.[0]?.content?.parts?.[0]?.text 
-            || "Erro ao gerar resposta.";
-
-        addMessage(botReply, "bot");
-
-        conversationHistory.push({
-            role: "model",
-            parts: [{ text: botReply }]
-        });
-
-    } catch (error) {
-        chat.removeChild(chat.lastChild);
-        addMessage("Erro ao conectar com a IA.", "bot");
-        console.error(error);
+    function setLevel(level, el){
+        currentLevel = level;
+        document.querySelectorAll(".level-btn").forEach(b=>b.classList.remove("active"));
+        el.classList.add("active");
     }
-}
 
-document.getElementById("input").addEventListener("keypress", function(e) {
-    if (e.key === "Enter") {
-        sendMessage();
+    async function obfuscate(){
+        const input = document.getElementById("codeInput");
+        const btn = document.getElementById("obfBtn");
+
+        if(!input.value.trim()){
+            alert("Coloque um script primeiro");
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerText = "Ofuscando...";
+
+        try{
+            const res = await fetch(apiUrl,{
+                method:"POST",
+                headers:{
+                    "Content-Type":"application/json",
+                    "x-api-key":apiKey
+                },
+                body:JSON.stringify({
+                    code: input.value,
+                    level: currentLevel
+                })
+            });
+
+            const data = await res.json();
+
+            if(data.success){
+                input.value = data.code;
+                showToast("Ofuscado!");
+            }else{
+                alert("Erro: " + (data.error || "Falha"));
+            }
+
+        }catch(e){
+            alert("Erro conexão: " + e.message);
+        }
+
+        btn.disabled = false;
+        btn.innerText = "Ofuscar";
     }
-});
 
+    function copyCode(){
+        const text = document.getElementById("codeInput").value;
+        navigator.clipboard.writeText(text);
+        showToast("Copiado!");
+    }
+
+    function clearCode(){
+        document.getElementById("codeInput").value = "";
+    }
+
+    function showToast(msg){
+        const t = document.getElementById("toast");
+        t.innerText = msg;
+        t.style.display = "block";
+        setTimeout(()=>t.style.display="none",2000);
+    }
 </script>
 
 </body>
