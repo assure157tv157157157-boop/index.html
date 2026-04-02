@@ -1,232 +1,184 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nova Obfuscator | Panel</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nova Obfuscator</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #0a0a0a;
+    color: white;
+}
 
-    <style>
-        :root {
-            --primary: #9d4edd;
-            --primary-hover: #7b2cbf;
-            --bg: #0a0a0a;
-            --card: rgba(20,20,20,0.8);
-            --border: rgba(255,255,255,0.1);
-            --text: #fff;
-            --text-dim: #aaa;
-        }
+header {
+    background: linear-gradient(90deg, #8b0000, #ff0000);
+    padding: 20px;
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+}
 
-        * {
-            margin:0;
-            padding:0;
-            box-sizing:border-box;
-            font-family:'Inter',sans-serif;
-        }
+.container {
+    max-width: 1000px;
+    margin: auto;
+    padding: 20px;
+}
 
-        body {
-            background: radial-gradient(circle,#1a0b2e,#0a0a0a);
-            color:var(--text);
-            display:flex;
-            flex-direction:column;
-            align-items:center;
-        }
+.editor {
+    width: 100%;
+    height: 300px;
+    background: #111;
+    color: white;
+    border: 2px solid red;
+    border-radius: 10px;
+    padding: 15px;
+    font-size: 14px;
+    resize: none;
+}
 
-        header {
-            text-align:center;
-            padding:2rem;
-        }
+.buttons {
+    margin-top: 15px;
+    display: flex;
+    gap: 10px;
+}
 
-        .logo {
-            font-size:2.5rem;
-            font-weight:800;
-            background:linear-gradient(to right,#fff,var(--primary));
-            -webkit-background-clip:text;
-            -webkit-text-fill-color:transparent;
-        }
+button {
+    background: red;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
 
-        .container {
-            width:95%;
-            max-width:1000px;
-            display:grid;
-            grid-template-columns:1fr 300px;
-            gap:2rem;
-        }
+button:hover {
+    background: darkred;
+}
 
-        @media(max-width:850px){
-            .container{grid-template-columns:1fr;}
-        }
+.output {
+    margin-top: 20px;
+}
 
-        .glass {
-            background:var(--card);
-            border:1px solid var(--border);
-            border-radius:20px;
-            padding:1.5rem;
-            backdrop-filter:blur(10px);
-        }
+footer {
+    text-align: center;
+    padding: 15px;
+    margin-top: 40px;
+    color: gray;
+}
+</style>
 
-        textarea {
-            width:100%;
-            height:400px;
-            background:#0006;
-            border:1px solid var(--border);
-            border-radius:10px;
-            color:#ccc;
-            padding:1rem;
-            resize:none;
-        }
-
-        button {
-            cursor:pointer;
-            border:none;
-            border-radius:10px;
-            padding:0.8rem;
-        }
-
-        .level-btn {
-            width:100%;
-            background:#fff1;
-            margin-bottom:5px;
-            color:#fff;
-        }
-
-        .level-btn.active {
-            background:var(--primary);
-        }
-
-        .obf-btn {
-            width:100%;
-            background:var(--primary);
-            color:#fff;
-            font-weight:700;
-            margin-top:10px;
-        }
-
-        .obf-btn:hover {
-            background:var(--primary-hover);
-        }
-
-        .toast {
-            position:fixed;
-            bottom:20px;
-            right:20px;
-            background:#2ecc71;
-            padding:10px 20px;
-            border-radius:10px;
-            display:none;
-        }
-    </style>
 </head>
-
 <body>
 
 <header>
-    <h1 class="logo">Nova Obf</h1>
-    <p style="color:var(--text-dim)">Proteção de scripts Lua</p>
+Nova Script Obfuscator
 </header>
 
 <div class="container">
 
-    <div class="glass">
-        <h3>Source Code</h3>
-        <textarea id="codeInput" placeholder="-- Cole seu script aqui"></textarea>
+<h2>Coloque seu Script</h2>
 
-        <div style="display:flex;gap:10px;margin-top:10px;">
-            <button onclick="copyCode()" class="level-btn">Copy</button>
-            <button onclick="clearCode()" class="level-btn">Clear</button>
-        </div>
-    </div>
+<textarea id="code" class="editor" placeholder="Cole seu script aqui..."></textarea>
 
-    <div class="glass">
-        <h4>Level</h4>
+<div class="buttons">
+    
+    <input type="file" id="fileInput" hidden>
 
-        <button class="level-btn active" onclick="setLevel('weak',this)">Weak</button>
-        <button class="level-btn" onclick="setLevel('medium',this)">Medium</button>
-        <button class="level-btn" onclick="setLevel('strong',this)">Strong</button>
-        <button class="level-btn" onclick="setLevel('harder',this)">Harder</button>
-        <button class="level-btn" onclick="setLevel('premium',this)">Premium</button>
-        <button class="level-btn" onclick="setLevel('ultra',this)">Ultra</button>
-
-        <button id="obfBtn" onclick="obfuscate()" class="obf-btn">
-            Ofuscar
-        </button>
-    </div>
+    <button onclick="openFile()">Abrir Arquivo</button>
+    <button onclick="obfuscate()">Ofuscar</button>
+    <button onclick="copyCode()">Copiar</button>
 
 </div>
 
-<div id="toast" class="toast">Copiado!</div>
+<div class="output">
+<h3>Resultado</h3>
+<textarea id="result" class="editor" placeholder="Script ofuscado aparecerá aqui..."></textarea>
+</div>
+
+</div>
+
+<footer>
+Nova Obfuscator © 2026
+</footer>
 
 <script>
-    let currentLevel = "weak";
 
-    const apiKey = "nova_f6fe7qtco9wzdj8cd2usxq"; // ✅ SUA API
-    const apiUrl = "https://nova-obf.netlify.app/.netlify/functions/obf";
+function openFile() {
+    document.getElementById("fileInput").click();
+}
 
-    function setLevel(level, el){
-        currentLevel = level;
-        document.querySelectorAll(".level-btn").forEach(b=>b.classList.remove("active"));
-        el.classList.add("active");
+document.getElementById("fileInput").addEventListener("change", function(event) {
+
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = function(e) {
+        document.getElementById("code").value = e.target.result;
+    };
+
+    reader.readAsText(file);
+});
+
+async function obfuscate() {
+
+    const code = document.getElementById("code").value;
+
+    if (!code) {
+        alert("Coloque um script primeiro");
+        return;
     }
 
-    async function obfuscate(){
-        const input = document.getElementById("codeInput");
-        const btn = document.getElementById("obfBtn");
+    document.getElementById("result").value = "Ofuscando...";
 
-        if(!input.value.trim()){
-            alert("Coloque um script primeiro");
-            return;
+    try {
+
+        const response = await fetch("https://nova-obf.netlify.app/.netlify/functions/obf", {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json",
+                "x-api-key": "nova_f6fe7qtco9wzdj8cd2usxq"
+            },
+
+            body: JSON.stringify({
+                code: code,
+                level: "premium"
+            })
+
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            document.getElementById("result").value = data.code;
+        } else {
+            document.getElementById("result").value = "Erro ao ofuscar";
         }
 
-        btn.disabled = true;
-        btn.innerText = "Ofuscando...";
-
-        try{
-            const res = await fetch(apiUrl,{
-                method:"POST",
-                headers:{
-                    "Content-Type":"application/json",
-                    "x-api-key":apiKey
-                },
-                body:JSON.stringify({
-                    code: input.value,
-                    level: currentLevel
-                })
-            });
-
-            const data = await res.json();
-
-            if(data.success){
-                input.value = data.code;
-                showToast("Ofuscado!");
-            }else{
-                alert("Erro: " + (data.error || "Falha"));
-            }
-
-        }catch(e){
-            alert("Erro conexão: " + e.message);
-        }
-
-        btn.disabled = false;
-        btn.innerText = "Ofuscar";
+    } catch (error) {
+        document.getElementById("result").value = "Erro de conexão";
     }
+}
 
-    function copyCode(){
-        const text = document.getElementById("codeInput").value;
-        navigator.clipboard.writeText(text);
-        showToast("Copiado!");
-    }
+function copyCode() {
 
-    function clearCode(){
-        document.getElementById("codeInput").value = "";
-    }
+    const result = document.getElementById("result");
 
-    function showToast(msg){
-        const t = document.getElementById("toast");
-        t.innerText = msg;
-        t.style.display = "block";
-        setTimeout(()=>t.style.display="none",2000);
-    }
+    result.select();
+    document.execCommand("copy");
+
+    alert("Script copiado!");
+
+}
+
 </script>
 
 </body>
