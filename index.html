@@ -60,8 +60,10 @@ button:hover {
     background: darkred;
 }
 
-.output {
-    margin-top: 20px;
+.output-buttons {
+    margin-top: 10px;
+    display: flex;
+    gap: 10px;
 }
 
 footer {
@@ -91,13 +93,18 @@ Nova Script Obfuscator
 
     <button onclick="openFile()">Abrir Arquivo</button>
     <button onclick="obfuscate()">Ofuscar</button>
-    <button onclick="copyCode()">Copiar</button>
 
 </div>
 
-<div class="output">
 <h3>Resultado</h3>
+
 <textarea id="result" class="editor" placeholder="Script ofuscado aparecerá aqui..."></textarea>
+
+<div class="output-buttons">
+
+    <button onclick="copyCode()">Copiar</button>
+    <button onclick="downloadCode()">Baixar</button>
+
 </div>
 
 </div>
@@ -164,7 +171,7 @@ async function obfuscate() {
         }
 
     } catch (error) {
-        document.getElementById("result").value = "Erro de conexão";
+        document.getElementById("result").value = "Erro de conexão com API";
     }
 }
 
@@ -177,6 +184,25 @@ function copyCode() {
 
     alert("Script copiado!");
 
+}
+
+function downloadCode() {
+
+    const code = document.getElementById("result").value;
+
+    if (!code) {
+        alert("Nada para baixar");
+        return;
+    }
+
+    const blob = new Blob([code], { type: "text/plain" });
+
+    const a = document.createElement("a");
+
+    a.href = URL.createObjectURL(blob);
+    a.download = "script-ofuscado.lua";
+
+    a.click();
 }
 
 </script>
